@@ -23,6 +23,9 @@ end_timestamp = int(end_time.timestamp() * 1000)
 
 historical_data = client.get_historical_klines(symbol, timeframe, start_timestamp, end_timestamp)
 
+for row in historical_data:
+    row[0] = int(row[0]/1000)
+
 with open(filename, 'w', newline='') as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(header)
