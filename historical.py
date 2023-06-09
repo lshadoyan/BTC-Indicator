@@ -4,7 +4,7 @@ import csv
 import os
 
 load_dotenv()
-header = ['Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume']
+header = ['Open time', 'Open', 'High', 'Low', 'Close', 'Volume', 'Close time', 'Quote asset volume', 'Number of trades', 'Taker buy base asset volume', 'Taker buy quote asset volume', 'Ignore']
 filename = 'bitcoin_data.csv'
 api_key = os.getenv("API_KEY")
 api_secret = os.getenv("SECRET_KEY")
@@ -20,7 +20,7 @@ class CryptoDataRetrieval:
         try:
             client = Client(api_key, api_secret)  
             historical_data = client.get_historical_klines(self.symbol, self.timeframe, self.start_timestamp, self.end_timestamp)
-
+            
             for row in historical_data:
                 row[0] = int(row[0]/1000)
 
