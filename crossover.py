@@ -7,6 +7,9 @@ crypto_data["Fast_Average"] = crypto_data["Close"].rolling(7).mean()
 crypto_data["Slow_Average"] = crypto_data["Close"].rolling(14).mean()
 crypto_data["Prev_Fast"] = crypto_data["Fast_Average"].shift(1)
 crypto_data["Prev_Slow"] = crypto_data["Slow_Average"].shift(1)
+
+crypto_data["Volume Change"] = crypto_data["Volume"].pct_change(7)
+
 crypto_data.dropna(inplace=True)
 
 def crossover_finder(prev_fast, fast, slow):
@@ -31,4 +34,5 @@ for index_bull in range(len(crypto_data)):
                 crypto_data.at[index_bull, 'Profit'] = "Decrease"
             else:
                 crypto_data.at[index_bull, 'Profit'] = "Increase"
+
         
