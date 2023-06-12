@@ -28,18 +28,26 @@ def crossover_finder(prev_fast, fast, slow):
 
 crypto_data["Crossover"] = np.vectorize(crossover_finder)(crypto_data["Prev_Fast"], crypto_data["Fast_Average"], crypto_data["Slow_Average"])
 
-crypto_data["Profit"] = "Neither"
 
-for index_bull in range(len(crypto_data)):
-    if crypto_data.iloc[index_bull]["Crossover"] == "Bull":
-        index_bear = index_bull + 1
-        while index_bear < len(crypto_data) and crypto_data.iloc[index_bear]["Crossover"] != "Bull":
-            index_bear += 1
-        if index_bear < len(crypto_data):
-            profit = crypto_data.iloc[index_bear]["Close"] - crypto_data.iloc[index_bull]["Close"]
+profit_column = []
+
+for index, row in crypto_data.iterrows():
+    if row["Crossover"] == "Bull":
+        bear_index = index + 1
+        while bear_index < len(crypto_data) and crypto_data.loc[bear_index, "Crossover"] != "Bear":
+            bear_index += 1
+        if bear_index < len(crypto_data):
+            profit = crypto_data.loc[bear_index, "Close"] - row["Close"]
             if profit < 0:
-                crypto_data.at[index_bull, 'Profit'] = "Decrease"
+                profit_column.append("Decrease")
             else:
-                crypto_data.at[index_bull, 'Profit'] = "Increase"
+                profit_column.append("Increase")
+        else:
+            profit_column.append("Neither")
+    else:
+        profit_column.append("Neither")
 
-        
+crypto_data["Profit"] = profit_column
+crypto_data = crypto_data[crypto_data["Crossover"].isin(["Bull"])]
+
+crypto_data.to_csv("bitcoin_data_V2.csv")
