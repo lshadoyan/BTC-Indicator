@@ -17,6 +17,24 @@ ranges = pd.concat([high_low, high_close, low_close], axis=1)
 true_range = np.max(ranges, axis=1)
 crypto_data["ATR"] = true_range.rolling(14).sum()/14
 
+import pandas as pd
+
+def calculate_rsi(data, window=14):
+    delta = data.diff()
+    up = delta.clip(lower=0)
+    down = -1 * delta.clip(upper=0)
+
+    avg_gain = up.rolling(window).mean()
+    avg_loss = down.rolling(window).mean()
+
+    rs = avg_gain / avg_loss
+    rsi = 100 - (100 / (1 + rs))
+
+    return rsi
+
+crypto_data['RSI'] = calculate_rsi(crypto_data['Close'])
+
+
 crypto_data.dropna(inplace=True)
 
 def crossover_finder(prev_fast, fast, slow):
@@ -49,5 +67,6 @@ for index, row in crypto_data.iterrows():
 
 crypto_data["Profit"] = profit_column
 crypto_data = crypto_data[crypto_data["Crossover"].isin(["Bull"])]
-
+delete_columns = ['Open time','Close time', 'Quote asset volume', 'Number of trades','Ignore']
+crypto_data = crypto_data.drop(delete_columns, axis = 1)
 crypto_data.to_csv("bitcoin_data_V2.csv")
