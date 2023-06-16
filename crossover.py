@@ -48,6 +48,8 @@ crypto_data["Crossover"] = np.vectorize(crossover_finder)(crypto_data["Prev_Fast
 
 def profit_calculation():
     profit_column = []
+    profit_values = []
+    bear_indexes = []
 
     for index, row in crypto_data.iterrows():
         if row["Crossover"] == "Bull":
@@ -58,14 +60,24 @@ def profit_calculation():
                 profit = crypto_data.loc[bear_index, "Close"] - row["Close"]
                 if profit < 0:
                     profit_column.append("Decrease")
+                    profit_values.append(profit)
+                    bear_indexes.append(bear_index)
                 else:
                     profit_column.append("Increase")
+                    profit_values.append(profit)
+                    bear_indexes.append(bear_index)
             else:
-                profit_column.append("Neither")
+                profit_column.append(None)
+                profit_values.append(None)
+                bear_indexes.append(None)
         else:
-            profit_column.append("Neither")
+            profit_column.append(None)
+            profit_values.append(None)
+            bear_indexes.append(None)
 
     crypto_data["Profit"] = profit_column
+    crypto_data["Profit Values"] = profit_values
+    crypto_data["Bear Index"] = bear_indexes
 
 profit_calculation() 
 
@@ -74,6 +86,7 @@ def new_csv():
     crypto_data = crypto_data[crypto_data["Crossover"].isin(["Bull"])]
     delete_columns = ['Open time','Close time', 'Quote asset volume', 'Number of trades','Ignore']
     crypto_data = crypto_data.drop(delete_columns, axis = 1)
-    crypto_data.to_csv("bitcoin_data_V2.csv")
+    crypto_data.dropna(inplace=True)
+    crypto_data.to_csv("bitcoin_data_V3.csv")
 
 new_csv()
