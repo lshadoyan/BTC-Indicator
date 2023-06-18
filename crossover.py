@@ -79,7 +79,14 @@ def profit_calculation():
     crypto_data["Profit Values"] = profit_values
     crypto_data["Bear Index"] = bear_indexes
 
+
+
 profit_calculation() 
+
+count = crypto_data["Profit"].value_counts()
+print(count.sum())
+increase_ratio = count["Increase"] / count.sum()
+print(increase_ratio * 100)
 
 def new_csv():
     global crypto_data
