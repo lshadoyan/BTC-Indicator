@@ -7,10 +7,10 @@ from sklearn.preprocessing import MinMaxScaler
 
 
 # Assuming you have a DataFrame 'crypto_data' with features and target column
-crypto_data = pd.read_csv("bitcoin_data_V2.csv")
+crypto_data = pd.read_csv("bitcoin_data_V3.csv")
 
 
-exclude_columns = ['Timestamp']
+exclude_columns = ['Timestamp', "Exit Price", "Profit/Loss", "Profit Values", "Bear Index"]
 numeric_columns = [column for column in crypto_data.columns if column not in exclude_columns and crypto_data[column].dtype != 'object']
 X = crypto_data[numeric_columns].copy()
 
@@ -18,7 +18,7 @@ X = crypto_data[numeric_columns].copy()
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
-y = crypto_data['Profit']
+y = crypto_data["Profit Indicator"]
 
 # Split the data into training and test sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)

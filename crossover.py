@@ -93,7 +93,7 @@ stop_loss_index = None
 multiplier = 1
 crypto_data["Exit Price"] = ""
 crypto_data["Profit/Loss"] = 0
-crypto_data["Profit Indicator"] = ""
+crypto_data["Profit Indicator"] = None
 
 bullish_index = None
 
@@ -115,29 +115,20 @@ for index, row in crypto_data.iterrows():
             crypto_data.at[bullish_index, "Profit Indicator"] = "Decrease" if profit_loss < 0 else "Increase"
             bullish_index = None
 
-        if row["Low"] <= trailing_stop_loss:
-            profit_loss = trailing_stop_loss - entry_price
-            crypto_data.at[bullish_index, "Profit/Loss"] = profit_loss
-            crypto_data.at[bullish_index, "Profit Indicator"] = "Decrease" if profit_loss < 0 else "Increase"
-            stop_loss_index = index
-        else:
-            profit_loss = row["Close"] - entry_price
-            crypto_data.at[bullish_index, "Profit/Loss"] = profit_loss
-            crypto_data.at[bullish_index, "Profit Indicator"] = "Increase" if profit_loss >= 0 else "Decrease"
-            crypto_data.at[bullish_index, "Index"] = index
-
-        bullish_index = None
-
 
 print(crypto_data["Profit/Loss"].sum())
 
+count = crypto_data["Profit Indicator"].value_counts()
+print(count)
+increase_ratio = count["Increase"] / count.sum()
+print(increase_ratio * 100)
 
 def new_csv():
     global crypto_data
     crypto_data = crypto_data[crypto_data["Crossover"].isin(["Bull"])]
     delete_columns = ['Open time','Close time', 'Quote asset volume', 'Number of trades','Ignore']
     crypto_data = crypto_data.drop(delete_columns, axis = 1)
-    # crypto_data.dropna(inplace=True)
+    crypto_data.dropna(inplace=True)
     crypto_data.to_csv("bitcoin_data_V3.csv")
 
 new_csv()
