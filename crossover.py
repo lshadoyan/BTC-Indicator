@@ -3,8 +3,13 @@ import numpy as np
 from IPython.display import display
 
 class Analyze:
-    def __innit__(self, file):
-        self.crypto_data = pd.read_csv(file)
+    def __innit__(self, file=None, dataframe=None):
+        if file:
+            self.crypto_data = pd.read_csv(file)
+        elif dataframe is not None:
+            self.crypto_data = dataframe
+        else:
+            self.crypto_data = None
 
     def averages(self, short_period, long_period):
         self.crypto_data = pd.read_csv("bitcoin_data.csv")
