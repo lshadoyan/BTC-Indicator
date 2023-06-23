@@ -11,15 +11,17 @@ class Analyze:
         else:
             self.crypto_data = None
 
-    def averages(self, short_period, long_period):
+    def averages(self, short_period=7, long_period=14):
         self.crypto_data = pd.read_csv("bitcoin_data.csv")
         self.crypto_data["Fast_Average"] = self.crypto_data["Close"].rolling(short_period).mean()
         self.crypto_data["Slow_Average"] = self.crypto_data["Close"].rolling(long_period).mean()
         self.crypto_data["Prev_Fast"] = self.crypto_data["Fast_Average"].shift(1)
         self.crypto_data["Prev_Slow"] = self.crypto_data["Slow_Average"].shift(1)
+    
+    def volume_calculation(self):
         self.crypto_data["Volume Change"] = self.crypto_data["Volume"].pct_change(7)
 
-    def ATR_calculation(self, period):
+    def ATR_calculation(self, period=14):
         high_low = self.crypto_data['High'] - self.crypto_data['Low']
         high_close = np.abs(self.crypto_data['High'] - self.crypto_data['Close'].shift())
         low_close = np.abs(self.crypto_data['Low'] - self.crypto_data['Close'].shift())
@@ -29,7 +31,7 @@ class Analyze:
 
     ATR_calculation(14)
 
-    def calculate_rsi(self, window):
+    def calculate_rsi(self, window=14):
         delta = self.crypto_data['Close'].diff()
         up = delta.clip(lower=0)
         down = -1 * delta.clip(upper=0)
@@ -105,7 +107,6 @@ class Analyze:
     def ATR_trailing_stop_loss(self):
         entry_price = 0
         trailing_stop_loss = 0
-        stop_loss_index = None
         multiplier = .9
         self.crypto_data["Exit Price"] = ""
         self.crypto_data["Profit/Loss"] = 0

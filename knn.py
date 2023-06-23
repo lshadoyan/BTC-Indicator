@@ -3,41 +3,51 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
-from sklearn.preprocessing import MinMaxScaler
 
+class KNN:
+    def __init__(self, filename):
+        self.crypto_data = pd.read_csv(filename)
 
-# Assuming you have a DataFrame 'crypto_data' with features and target column
-crypto_data = pd.read_csv("bitcoin_data_V3.csv")
+    def preprocess(self):
+        exclude_columns = ['Timestamp', "Exit Price", "Profit/Loss", "Profit Values", "Bear Index"]
+        numeric_columns = [column for column in self.crypto_data.columns if column not in exclude_columns and self.crypto_data[column].dtype != 'object']
+        X = self.crypto_data[numeric_columns].copy()
 
+        y = self.crypto_data["Profit Indicator"]
 
-exclude_columns = ['Timestamp', "Exit Price", "Profit/Loss", "Profit Values", "Bear Index"]
-numeric_columns = [column for column in crypto_data.columns if column not in exclude_columns and crypto_data[column].dtype != 'object']
-X = crypto_data[numeric_columns].copy()
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Apply scaling
-scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)
+        scaler = StandardScaler()
+        X_train = scaler.fit_transform(X_train)
+        X_test = scaler.transform(X_test)
 
-y = crypto_data["Profit Indicator"]
+        return X_train, X_test, y_train, y_test
+    
+    def model_train(self, X_train, y_train):
 
-# Split the data into training and test sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        knn = KNeighborsClassifier(n_neighbors=30)
 
-# Standardize the features
-scaler = StandardScaler()
-X_train = scaler.fit_transform(X_train)
-X_test = scaler.transform(X_test)
+        knn.fit(X_train, y_train)
 
-# Create the k-NN classifier
-knn = KNeighborsClassifier(n_neighbors=65)
+        return knn
 
-# Train the model
-knn.fit(X_train, y_train)
+    def evaluate(self, model, X_test, y_test):
+        y_pred = model.predict(X_test)
+        print(y_pred)
 
-# Make predictions on the test set
-y_pred = knn.predict(X_test)
+        accuracy = accuracy_score(y_test, y_pred)
+        print("Accuracy:", accuracy)
 
-# Evaluate the model
-accuracy = accuracy_score(y_test, y_pred)
-print("Accuracy:", accuracy)
+    def predict(self, dataframe, model):
+        exclude_columns = ['Timestamp']
+        numeric_columns = [column for column in self.data.columns if column not in exclude_columns and self.data[column].dtype != 'object']
+        X = dataframe[numeric_columns].copy()
+        
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
+        X_scaled = scaler.transform(X)
+        
+        prediction = model.predict(X_scaled)
+        
+        return prediction
 
