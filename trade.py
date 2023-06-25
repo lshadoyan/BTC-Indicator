@@ -47,5 +47,9 @@ class CryptoTrade:
         if sma_short_curr > sma_long_curr and sma_short_prev <= sma_long_curr:
             print("Bullish crossover detected!")
 
-    # current_row = dataframe.tail(1)
+    def first_candle(self):
+        current_row = self.dataframe.tail(1)
     # Need ATR Calculation, Volume Calculation, etc.
+    
+    def get_data_frame(self):
+        return self.dataframe
