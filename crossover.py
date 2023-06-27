@@ -3,7 +3,7 @@ import numpy as np
 from IPython.display import display
 
 class Analyze:
-    def __innit__(self, file=None, dataframe=None):
+    def __init__(self, file=None, dataframe=None):
         if file:
             self.crypto_data = pd.read_csv(file)
         elif dataframe is not None:
@@ -11,17 +11,16 @@ class Analyze:
         else:
             self.crypto_data = None
 
-    def averages(self, short_period=7, long_period=14):
-        self.crypto_data = pd.read_csv("bitcoin_data.csv")
+    def averages(self, short_period, long_period):
         self.crypto_data["Fast_Average"] = self.crypto_data["Close"].rolling(short_period).mean()
         self.crypto_data["Slow_Average"] = self.crypto_data["Close"].rolling(long_period).mean()
         self.crypto_data["Prev_Fast"] = self.crypto_data["Fast_Average"].shift(1)
         self.crypto_data["Prev_Slow"] = self.crypto_data["Slow_Average"].shift(1)
-    
+
     def volume_calculation(self):
         self.crypto_data["Volume Change"] = self.crypto_data["Volume"].pct_change(7)
 
-    def ATR_calculation(self, period=14):
+    def ATR_calculation(self, period):
         high_low = self.crypto_data['High'] - self.crypto_data['Low']
         high_close = np.abs(self.crypto_data['High'] - self.crypto_data['Close'].shift())
         low_close = np.abs(self.crypto_data['Low'] - self.crypto_data['Close'].shift())
@@ -29,9 +28,7 @@ class Analyze:
         true_range = np.max(ranges, axis=1)
         self.crypto_data["ATR"] = true_range.rolling(period).sum()/period
 
-    ATR_calculation(14)
-
-    def calculate_rsi(self, window=14):
+    def calculate_rsi(self, window):
         delta = self.crypto_data['Close'].diff()
         up = delta.clip(lower=0)
         down = -1 * delta.clip(upper=0)
@@ -43,8 +40,6 @@ class Analyze:
         rsi = 100 - (100 / (1 + rs))
 
         self.crypto_data['RSI'] = rsi
-
-    calculate_rsi(14)
 
     def drop_null(self):
         self.crypto_data.dropna(inplace=True)
@@ -92,7 +87,6 @@ class Analyze:
         self.crypto_data["Profit Values"] = profit_values
         self.crypto_data["Bear Index"] = bear_indexes
 
-    profit_calculation() 
     
     def display_profit(self, profit_values, profit_indicator):
         print(self.crypto_data[profit_values].sum())
@@ -102,7 +96,7 @@ class Analyze:
         increase_ratio = count["Increase"] / count.sum()
         print(increase_ratio * 100)
 
-    display_profit("Profit Values", "Profit")
+    # display_profit("Profit Values", "Profit")
     
     def ATR_trailing_stop_loss(self):
         entry_price = 0
@@ -132,15 +126,17 @@ class Analyze:
                     self.crypto_data.at[bullish_index, "Profit Indicator"] = "Decrease" if profit_loss < 0 else "Increase"
                     bullish_index = None
                     
-    ATR_trailing_stop_loss()
-    display_profit("Profit/Loss", "Profit Indicator")
+    # ATR_trailing_stop_loss()
+    # display_profit("Profit/Loss", "Profit Indicator")
 
 
     def save_as_csv(self, filename):
-        crypto_data = crypto_data[crypto_data["Crossover"].isin(["Bull"])]
-        delete_columns = ['Open time','Close time', 'Quote asset volume', 'Number of trades','Ignore', 'Profit']
-        crypto_data = crypto_data.drop(delete_columns, axis = 1)
-        crypto_data.dropna(inplace=True)
-        crypto_data.to_csv(filename)
+        new_crypto_data = self.crypto_data[self.crypto_data["Crossover"].isin(["Bull"])]
+        delete_columns = ['Open time','Close time', 'Quote asset volume', 'Number of trades','Ignore']
+        new_crypto_data = self.crypto_data.drop(delete_columns, axis = 1)
+        new_crypto_data.dropna(inplace=True)
+        new_crypto_data.to_csv(filename)
 
-    save_as_csv("bitcoin_data_V3.csv")
+    # save_as_csv("bitcoin_data_V3.csv")
+    def get_dataframe(self):
+        return self.crypto_data

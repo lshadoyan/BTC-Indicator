@@ -6,10 +6,10 @@ from sklearn.metrics import accuracy_score
 
 class KNN:
     def __init__(self, filename):
-        self.crypto_data = pd.read_csv(filename)
+            self.crypto_data = pd.read_csv(filename)
 
     def preprocess(self):
-        exclude_columns = ['Timestamp', "Exit Price", "Profit/Loss", "Profit Values", "Bear Index"]
+        exclude_columns = ['Timestamp', "Exit Price", "Profit/Loss", "Profit Values", "Bear Index", "Profit", 'Taker buy base asset volume', 'Taker buy quote asset volume', 'Exit Price', 'Unnamed: 0']
         numeric_columns = [column for column in self.crypto_data.columns if column not in exclude_columns and self.crypto_data[column].dtype != 'object']
         X = self.crypto_data[numeric_columns].copy()
 
@@ -39,8 +39,8 @@ class KNN:
         print("Accuracy:", accuracy)
 
     def predict(self, dataframe, model):
-        exclude_columns = ['Timestamp']
-        numeric_columns = [column for column in self.data.columns if column not in exclude_columns and self.data[column].dtype != 'object']
+        exclude_columns = ['Unnamed: 0', 'Taker buy base asset volume', 'Taker buy quote asset volume', 'Exit Price', 'Profit/Loss']
+        numeric_columns = [column for column in self.crypto_data.columns if column not in exclude_columns and self.crypto_data[column].dtype != 'object']
         X = dataframe[numeric_columns].copy()
         
         scaler = StandardScaler()

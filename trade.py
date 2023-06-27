@@ -8,7 +8,7 @@ api_secret = os.getenv("SECRET_KEY")
 class CryptoTrade:
     def __init__(self, symbol, interval, limit):
         client = Client(api_key, api_secret)
-        self.candles = client.get_klines(symbol, interval, limit) 
+        self.candles = client.get_klines(symbol=symbol, interval=interval, limit=limit) 
 
     # candles = client.get_klines(symbol='BTCUSDT', interval=Client.KLINE_INTERVAL_1WEEK, limit=15)
     def dataframe_creation(self):
@@ -45,10 +45,10 @@ class CryptoTrade:
         print(str(sma_long_prev) + " long prev")
         # Check for a bullish crossover 
         if sma_short_curr > sma_long_curr and sma_short_prev <= sma_long_curr:
-            print("Bullish crossover detected!")
-
+            return "Bullish" 
+        return "Neither"
     def first_candle(self):
-        current_row = self.dataframe.tail(1)
+        self.dataframe.tail(1)
     # Need ATR Calculation, Volume Calculation, etc.
     
     def get_data_frame(self):
