@@ -5,12 +5,13 @@ from knn import KNN
 from trade import CryptoTrade
 from datetime import datetime
 
-def main():
-    #Data Retrieval
+#Data Retrieval
+def data_retrieval():
     crypto_data = CryptoDataRetrieval('BTCUSDT', Client.KLINE_INTERVAL_1HOUR, datetime(2020, 1, 1), datetime(2022, 5, 20))
     crypto_data.data_retrieval()
 
-    # KNN Accuracy 
+# KNN Accuracy 
+def knn_evaluation():
     data_modifier = Analyze(file="bitcoin_data.csv")
     data_modifier.averages(7, 14)
     data_modifier.volume_calculation()
@@ -25,7 +26,7 @@ def main():
     model = knn_accuracy.model_train(preprocess[0], preprocess[2])
     knn_accuracy.evaluate(model, preprocess[1], preprocess[3])
 
-
+def indicator():
     #Trade Identifier
     trade = CryptoTrade('BTCUSDT', Client.KLINE_INTERVAL_1WEEK, 15)
     trade.dataframe_creation()
@@ -45,6 +46,11 @@ def main():
         print(prediction)
     else:
         print("Neither")
+
+def main():
+    data_retrieval()
+    knn_evaluation()
+    indicator()
 
 if __name__ == "__main__":
     main()
