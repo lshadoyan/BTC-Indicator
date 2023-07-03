@@ -1,9 +1,12 @@
+from bot import start_bot, trade_identifier
 from binance.client import Client
 from historical import CryptoDataRetrieval
 from crossover import Analyze
 from knn import KNN
 from trade import CryptoTrade
 from datetime import datetime
+import schedule 
+import time
 
 #Data Retrieval
 def data_retrieval():
@@ -43,14 +46,22 @@ def indicator():
         trade_preprocess = knn_prediction.preprocess()
         model = knn_prediction.model_train(trade_preprocess[0], trade_preprocess[2])
         prediction = knn_prediction.predict(data, model)
-        print(prediction)
+        return(str(prediction[0]))
     else:
-        print("Neither")
+        return("Neither")
 
 def main():
-    data_retrieval()
-    knn_evaluation()
-    indicator()
+    # data_retrieval()
+    # knn_evaluation()
+    schedule.every().minute.do(trade_identifier(indicator()))
+    while True:
+        schedule.run_pending
+        time.sleep(1)
+    # result = indicator()
+    # print(result)
+    # trade_identifier(result)
+    # start_bot()
 
 if __name__ == "__main__":
+    start_bot()
     main()
