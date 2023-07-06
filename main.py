@@ -1,4 +1,4 @@
-from bot import start_bot, trade_identifier, send_notification_periodically
+from bot import start_bot, trade_identifier, send_discord_notification
 from binance.client import Client
 from historical import CryptoDataRetrieval
 from crossover import Analyze
@@ -55,12 +55,16 @@ async def periodic_notification():
         current_time = datetime.now()
         if current_time.second == 0:
             result = indicator()
-            await trade_identifier(result)
+            await (trade_identifier(result))
         await asyncio.sleep(1)
 
+async def start():
+    bot_start = asyncio.create_task(start_bot())
+    await asyncio.sleep(1)
+    message = asyncio.create_task(periodic_notification())
+    await asyncio.gather(bot_start, message)
 def main():
-    asyncio.run(start_bot()) 
-    asyncio.create_task(periodic_notification())
+    asyncio.run(start())
 
 if __name__ == "__main__":
     main()

@@ -20,26 +20,18 @@ async def on_ready():
 
 async def send_discord_notification(message):
     channel_id = 1125539153803751465
-
     channel = bot.get_channel(channel_id)
     await channel.send(message)
-
-async def send_notification_periodically(result):
-    while True:
-        current_time = datetime.now()
-        if current_time.minute == 0:
-            await trade_identifier(result)
-        await asyncio.sleep(1)
 
 async def trade_identifier(result):
     if result == "Decrease":
         message = "Decreasing bullish trade identified."
-    elif result == "Increasing":
+    elif result == "Increase":
         message = "Increasing bullish trade identified"
     else:
         message = "No trade identified."
 
     await send_discord_notification(message)
 
-def start_bot():
-    bot.run(bot_token)
+async def start_bot():
+    await bot.start(bot_token)
