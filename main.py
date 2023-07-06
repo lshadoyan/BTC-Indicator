@@ -1,12 +1,12 @@
-from bot import start_bot, trade_identifier
+from bot import start_bot, trade_identifier, send_notification_periodically
 from binance.client import Client
 from historical import CryptoDataRetrieval
 from crossover import Analyze
 from knn import KNN
 from trade import CryptoTrade
 from datetime import datetime
-import schedule 
-import time
+
+import asyncio
 
 #Data Retrieval
 def data_retrieval():
@@ -46,22 +46,21 @@ def indicator():
         trade_preprocess = knn_prediction.preprocess()
         model = knn_prediction.model_train(trade_preprocess[0], trade_preprocess[2])
         prediction = knn_prediction.predict(data, model)
+        print("1")
         return(str(prediction[0]))
     else:
         return("Neither")
+async def periodic_notification():
+    while True:
+        current_time = datetime.now()
+        if current_time.second == 0:
+            result = indicator()
+            await trade_identifier(result)
+        await asyncio.sleep(1)
 
 def main():
-    # data_retrieval()
-    # knn_evaluation()
-    schedule.every().minute.do(trade_identifier(indicator()))
-    while True:
-        schedule.run_pending
-        time.sleep(1)
-    # result = indicator()
-    # print(result)
-    # trade_identifier(result)
-    # start_bot()
+    asyncio.run(start_bot()) 
+    asyncio.create_task(periodic_notification())
 
 if __name__ == "__main__":
-    start_bot()
     main()
