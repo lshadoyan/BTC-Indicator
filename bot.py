@@ -1,8 +1,6 @@
 from discord.ext import commands
-from datetime import datetime
 from dotenv import load_dotenv
 import discord
-import asyncio
 import os
 
 load_dotenv()
@@ -21,15 +19,19 @@ async def on_ready():
 async def send_discord_notification(message):
     channel_id = 1125539153803751465
     channel = bot.get_channel(channel_id)
-    await channel.send(message)
+    embed = discord.Embed(title = message, description="Bullish Trend", color=discord.Color.green())
+    embed.set_author(name="Indicator", icon_url="https://i.imgur.com/cgEEz1h.png")
+    embed.set_thumbnail(url="https://i.imgur.com/sn0HQ84.png")
+    embed.url = ("https://www.binance.com/en/trade/BTC_USDT?theme=dark&type=spot")
+    await channel.send(embed=embed)
 
-async def trade_identifier(result):
+async def trade_identifier(result, symbol):
     if result == "Decrease":
-        message = "Decreasing bullish trade identified."
+        message = symbol + ": Decreasing bullish trade identified."
     elif result == "Increase":
-        message = "Increasing bullish trade identified"
+        message = symbol + ": Increasing bullish trade identified"
     else:
-        message = "No trade identified."
+        message = symbol + ": No trade identified."
 
     await send_discord_notification(message)
 

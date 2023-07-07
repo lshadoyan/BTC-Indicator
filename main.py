@@ -7,10 +7,10 @@ from trade import CryptoTrade
 from datetime import datetime
 
 import asyncio
-
+symbol = 'BTCUSDT'
 #Data Retrieval
 def data_retrieval():
-    crypto_data = CryptoDataRetrieval('BTCUSDT', Client.KLINE_INTERVAL_1HOUR, datetime(2020, 1, 1), datetime(2022, 5, 20))
+    crypto_data = CryptoDataRetrieval(symbol, Client.KLINE_INTERVAL_1HOUR, datetime(2020, 1, 1), datetime(2022, 5, 20))
     crypto_data.data_retrieval()
 
 # KNN Accuracy 
@@ -31,7 +31,7 @@ def knn_evaluation():
 
 def indicator():
     #Trade Identifier
-    trade = CryptoTrade('BTCUSDT', Client.KLINE_INTERVAL_1WEEK, 15)
+    trade = CryptoTrade(symbol, Client.KLINE_INTERVAL_1WEEK, 15)
     trade.dataframe_creation()
     if trade.bullish_crossover(7, 14) == ("Bullish"): 
         trade_dataframe = trade.get_data_frame()
@@ -46,16 +46,16 @@ def indicator():
         trade_preprocess = knn_prediction.preprocess()
         model = knn_prediction.model_train(trade_preprocess[0], trade_preprocess[2])
         prediction = knn_prediction.predict(data, model)
-        print("1")
         return(str(prediction[0]))
     else:
         return("Neither")
+    
 async def periodic_notification():
     while True:
         current_time = datetime.now()
         if current_time.second == 0:
             result = indicator()
-            await (trade_identifier(result))
+            await (trade_identifier(result, symbol))
         await asyncio.sleep(1)
 
 async def start():
@@ -63,6 +63,7 @@ async def start():
     await asyncio.sleep(1)
     message = asyncio.create_task(periodic_notification())
     await asyncio.gather(bot_start, message)
+
 def main():
     asyncio.run(start())
 
