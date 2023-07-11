@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from IPython.display import display
+import matplotlib.pyplot as plt
 
 class Analyze:
     def __init__(self, file=None, dataframe=None):
@@ -102,7 +103,9 @@ class Analyze:
         entry_price = 0
         trailing_stop_loss = 0
         multiplier = .9
-        self.crypto_data["Exit Price"] = ""
+        self.crypto_data["Start Price"] = 0
+        self.crypto_data["Middle Price"] = 0
+        self.crypto_data["End Price"] = 0
         self.crypto_data["Profit/Loss"] = 0
         self.crypto_data["Profit Indicator"] = None
 
@@ -111,20 +114,35 @@ class Analyze:
         for index, row in self.crypto_data.iterrows():
             if row["Crossover"] == "Bull":
                 if bullish_index is None:
-                    entry_price = row["Close"]
+                    entry_price = row["Open"]
                     atr = row["ATR"]
                     trailing_stop_loss = entry_price
                     bullish_index = index
                     trailing_stop_loss = entry_price - (multiplier * atr)
+                    self.crypto_data.at[bullish_index, "Start Price"] = trailing_stop_loss
             elif bullish_index is not None:
                 atr = row["ATR"]
                 trailing_stop_loss = row["Open"] - (multiplier * atr)
-                if row["Low"] <= trailing_stop_loss:
+                if row["Low"] >= trailing_stop_loss: 
+                    self.crypto_data.at[index, "Middle Price"] = trailing_stop_loss
+                elif row["Low"] <= trailing_stop_loss:
                     profit_loss = trailing_stop_loss - entry_price 
-                    self.crypto_data.at[bullish_index, "Exit Price"] = trailing_stop_loss
+                    self.crypto_data.at[index, "End Price"] = trailing_stop_loss
                     self.crypto_data.at[bullish_index, "Profit/Loss"] = profit_loss 
                     self.crypto_data.at[bullish_index, "Profit Indicator"] = "Decrease" if profit_loss < 0 else "Increase"
                     bullish_index = None
+
+        fig, ax = plt.subplots()
+        ax.plot(self.crypto_data["Close"], label="Close Price")
+        ax.plot(self.crypto_data["Open"], label="Open Price")
+        ax.plot(self.crypto_data["Start Price"], label="Start Trailing Stop Loss")
+        ax.plot(self.crypto_data["Middle Price"], label="Middle Trailing Stop Loss")
+        ax.plot(self.crypto_data["End Price"], label="End Trailing Stop Loss")
+        ax.set_xlabel("Time")
+        ax.set_ylabel("Price")
+        ax.set_title("ATR Trailing Stop Loss")
+        ax.legend()
+        plt.show()
                     
     # ATR_trailing_stop_loss()
     # display_profit("Profit/Loss", "Profit Indicator")
