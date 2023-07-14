@@ -26,12 +26,12 @@ async def send_discord_notification(message):
     await channel.send(embed=embed)
 
 async def trade_identifier(result, symbol):
-    if result == "Decrease":
-        message = symbol + ": Decreasing bullish trade identified."
-    elif result == "Increase":
+    # if result == "Decrease":
+    #     message = symbol + ": Decreasing bullish trade identified."
+    if result == "Increase":
         message = symbol + ": Increasing bullish trade identified"
-    else:
-        message = symbol + ": No trade identified."
+    elif result == "Sell":
+        message = symbol + ": Sell point identified."
 
     await send_discord_notification(message)
 
