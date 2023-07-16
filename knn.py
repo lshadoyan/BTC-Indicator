@@ -1,6 +1,6 @@
 import pandas as pd
+import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
 
@@ -9,19 +9,23 @@ class KNN:
             self.crypto_data = pd.read_csv(filename)
 
     def preprocess(self):
-        exclude_columns = ['Timestamp', "Exit Price", "Profit/Loss", "Profit Values", "Bear Index", "Profit", 'Taker buy base asset volume', 'Taker buy quote asset volume', 'Exit Price', 'Unnamed: 0']
+        exclude_columns = ['Timestamp', "Exit Price", "Profit/Loss", "Profit Values", "Bear Index", "Profit", 'Taker buy base asset volume', 'Taker buy quote asset volume', 'Exit Price', 'Unnamed: 0', 'Start Price', 'Middle Price', 'End Price']
         numeric_columns = [column for column in self.crypto_data.columns if column not in exclude_columns and self.crypto_data[column].dtype != 'object']
+        
         X = self.crypto_data[numeric_columns].copy()
-
         y = self.crypto_data["Profit Indicator"]
+
+        X = self.scale_data(X)
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-        scaler = StandardScaler()
-        X_train = scaler.fit_transform(X_train)
-        X_test = scaler.transform(X_test)
-
         return X_train, X_test, y_train, y_test
+    
+    def scale_data(self, X):
+         mean = np.mean(X, axis=0)
+         std = np.std(X, axis=0)
+         X_scaled = (X - mean) / std
+         return X_scaled
     
     def model_train(self, X_train, y_train):
 
@@ -43,9 +47,7 @@ class KNN:
         numeric_columns = [column for column in self.crypto_data.columns if column not in exclude_columns and self.crypto_data[column].dtype != 'object']
         X = dataframe[numeric_columns].copy()
         
-        scaler = StandardScaler()
-        X_scaled = scaler.fit_transform(X)
-        X_scaled = scaler.transform(X)
+        X_scaled = self.scale_data(X)
         
         prediction = model.predict(X_scaled)
         
