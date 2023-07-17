@@ -7,12 +7,14 @@ from trade import CryptoTrade
 from datetime import datetime
 import subprocess
 import time
-
 import asyncio
+import utility
+
 symbol = 'BTCUSDT'
 short_period = 7
 long_period = 14
-#Data Retrieval
+
+# Data Retrieval
 def data_retrieval():
     crypto_data = CryptoDataRetrieval(symbol, Client.KLINE_INTERVAL_1HOUR, datetime(2020, 1, 1), datetime(2022, 5, 20))
     crypto_data.data_retrieval()
@@ -109,11 +111,19 @@ def calculate_ATR_stoploss_hourly():
 
 
 def main():
-    if not check_internet_connection():
-        print("Cannot establish internet connection. Exiting...")
-        return
-    asyncio.run(start())
-    # knn_evaluation()
+    args = utility.create_parser()
+    if args.command == 'data_retrieval':
+        data_retrieval()
+    elif args.command == 'indicator':
+        indicator()
+    elif args.command == 'knn_evaluation':
+        knn_evaluation()
+    elif args.command == 'bot_indicator':
+        if not check_internet_connection():
+            print("Cannot establish internet connection. Exiting...")
+            return
+        asyncio.run(start())
+    
 
 if __name__ == "__main__":
     main()
