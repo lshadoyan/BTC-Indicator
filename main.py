@@ -5,8 +5,6 @@ from crossover import Analyze
 from knn import KNN
 from trade import CryptoTrade
 from datetime import datetime
-import subprocess
-import time
 import asyncio
 import utility
 
@@ -82,22 +80,6 @@ async def start():
     message = asyncio.create_task(periodic_notification())
     await asyncio.gather(bot_start, message)
 
-def check_internet_connection():
-    while True:
-        try:
-            response = subprocess.run(['ping', '-n', '1', 'google.com'], capture_output=True)
-            if response.returncode == 0:
-                print("Connected to the internet.")
-                return True
-            else:
-                print("No internet connection. Retrying in 5 seconds...")
-                time.sleep(5)
-                continue
-        except subprocess.CalledProcessError:
-            print("No internet connection. Retrying in 5 seconds...")
-            time.sleep(5)
-            return False
-
 def calculate_ATR_stoploss_hourly():
     trade = CryptoTrade(symbol, Client.KLINE_INTERVAL_1WEEK, long_period + 1)
     trade.dataframe_creation()
@@ -109,7 +91,6 @@ def calculate_ATR_stoploss_hourly():
     trailing_stop_loss = dataframe.at[14, "Close"] - (0.9 * dataframe.at[14, "ATR"])
     return trailing_stop_loss, dataframe.at[14, "Close"]
 
-
 def main():
     args = utility.create_parser()
     if args.command == 'data_retrieval':
@@ -119,7 +100,7 @@ def main():
     elif args.command == 'knn_evaluation':
         knn_evaluation()
     elif args.command == 'bot_indicator':
-        if not check_internet_connection():
+        if not utility.check_internet_connection():
             print("Cannot establish internet connection. Exiting...")
             return
         asyncio.run(start())
