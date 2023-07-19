@@ -1,6 +1,6 @@
 import argparse 
 import time 
-import subprocess
+import socket
 
 def create_parser():
     parser = argparse.ArgumentParser(description="Arguments: data_retrieval, indicator, knn_evaluation, bot_indicator")
@@ -15,15 +15,13 @@ def create_parser():
 def check_internet_connection():
     while True:
         try:
-            response = subprocess.run(['ping', '-n', '1', 'google.com'], capture_output=True)
-            if response.returncode == 0:
-                print("Connected to the internet.")
+            sock = socket.create_connection(("www.google.com", 80) , 5)
+            if sock is not None: 
+                sock.close 
+                print("Connected to the Internet.")
                 return True
-            else:
-                print("No internet connection. Retrying in 5 seconds...")
-                time.sleep(5)
-                continue
-        except subprocess.CalledProcessError:
+        except OSError: 
             print("No internet connection. Retrying in 5 seconds...")
             time.sleep(5)
-            return False
+            continue
+        
