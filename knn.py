@@ -16,8 +16,9 @@ class KNN:
         y = self.crypto_data["Profit Indicator"]
 
         X = self.scale_data(X)
+        # print(X.shape)
 
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        X_train, X_test, y_train, y_test = self.split_data(X, y, test_size=0.2, random_state=42)
 
         return X_train, X_test, y_train, y_test
     
@@ -26,6 +27,25 @@ class KNN:
          std = np.std(X, axis=0)
          X_scaled = (X - mean) / std
          return X_scaled
+    
+    def split_data(self, X, y, test_size=0.2, random_state=42):
+        num_samples = len(X)
+        num_test_samples = int(num_samples * test_size)
+        num_train_samples = num_samples - num_test_samples
+
+        np.random.seed(random_state)
+
+        indices = np.random.permutation(num_samples)
+        train_indices = indices[:num_train_samples]
+        test_indices = indices[num_train_samples:]
+
+        X_train = X.iloc[train_indices]
+        X_test = X.iloc[test_indices]
+        print(X_train.shape)
+        y_train = y.iloc[train_indices]
+        y_test = y.iloc[test_indices]
+
+        return X_train, X_test, y_train, y_test
     
     def model_train(self, X_train, y_train):
 
