@@ -1,6 +1,7 @@
 import argparse 
 import time 
 import socket
+import numpy as np
 
 def create_parser():
     parser = argparse.ArgumentParser(description="Arguments: data_retrieval, indicator, knn_evaluation, bot_indicator")
@@ -25,3 +26,6 @@ def check_internet_connection():
             time.sleep(5)
             continue
         
+def euclidean_distance(x1, x2):
+    distance = np.sqrt(np.sum((x2 -x1)**2))
+    return distance
