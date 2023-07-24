@@ -6,6 +6,8 @@ from sklearn.metrics import accuracy_score
 from collections import Counter
 from tqdm import tqdm
 
+mean = 0
+std = 0
 class KNN:
     def __init__(self, filename, k):
             self.crypto_data = pd.read_csv(filename)
@@ -17,17 +19,20 @@ class KNN:
         
         self.X = self.crypto_data[numeric_columns].copy()
         self.y = self.crypto_data["Profit Indicator"]
-        self.X = self.scale_data(self.X)
-
+        self.X = self.scale_data(self.X, False)
 
         X_train, X_test, y_train, y_test = self.split_data(self.X, self.y, test_size=0.2, random_state=12)
         return X_train, X_test, y_train, y_test
     
-    def scale_data(self, X):
-         mean = np.mean(X, axis=0)
-         std = np.std(X, axis=0)
-         X_scaled = (X - mean) / std
-         return X_scaled
+    def scale_data(self, X, single):
+        global mean, std
+        if single:
+            X_scaled = (X - mean) / std
+        else:
+            mean = np.mean(X, axis=0)
+            std = np.std(X, axis=0)
+            X_scaled = (X - mean) / std
+        return X_scaled
     
     def split_data(self, X, y, test_size=0.2, random_state=42):
         num_samples = len(X)
@@ -49,6 +54,7 @@ class KNN:
     
     def predict(self, X_test, X_train):
          predict = [self._predict(x, X_train) for x in tqdm(X_test.itertuples(index=False), total=len(X_test))]
+        #  utility.print_distances()
          return predict
 
     def _predict(self, x, X_train):
@@ -60,7 +66,7 @@ class KNN:
     
     def model_train(self, X_train, y_train):
 
-        knn = KNeighborsClassifier(n_neighbors=45)
+        knn = KNeighborsClassifier(n_neighbors=self.k)
 
         knn.fit(X_train, y_train)
 
@@ -73,19 +79,19 @@ class KNN:
     
     def evaluate2(self, model, X_test, y_test):
         y_pred = model.predict(X_test)
-        print(y_pred)
 
         accuracy = accuracy_score(y_test, y_pred)
         print("Accuracy:", accuracy)
 
-    def predict(self, dataframe, model):
-        exclude_columns = ['Unnamed: 0', 'Taker buy base asset volume', 'Taker buy quote asset volume', 'Exit Price', 'Profit/Loss']
-        numeric_columns = [column for column in self.crypto_data.columns if column not in exclude_columns and self.crypto_data[column].dtype != 'object']
-        X = dataframe[numeric_columns].copy()
-        
-        X_scaled = self.scale_data(X)
-        
-        prediction = model.predict(X_scaled)
-        
+    def current_predict(self, dataframe, model):
+        prediction = model.predict(dataframe)
+
         return prediction
+    
+    def preprocess_single(self, dataframe):
+        exclude_columns = ['Timestamp','Unnamed: 0', 'Taker buy base asset volume', 'Taker buy quote asset volume', 'Exit Price', 'Profit/Loss', 'Start Price', 'Middle Price', 'End Price']
+        numeric_columns = [column for column in dataframe.columns if column not in exclude_columns and dataframe[column].dtype != 'object']
+        X = dataframe[numeric_columns].copy()
+        X_scaled = self.scale_data(X, True)
+        return X_scaled
 

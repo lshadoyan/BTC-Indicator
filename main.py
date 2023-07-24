@@ -18,7 +18,7 @@ def data_retrieval():
     crypto_data.data_retrieval()
 
 # KNN Accuracy 
-def knn_evaluation():
+def knn_evaluation(args):
     data_modifier = Analyze(file="bitcoin_data.csv")
     data_modifier.averages(short_period, long_period)
     data_modifier.volume_calculation()
@@ -28,29 +28,38 @@ def knn_evaluation():
     data_modifier.crossover_detection()
     data_modifier.ATR_trailing_stop_loss()
     data_modifier.save_as_csv("bitcoin_data_V4.csv")
-    knn_accuracy = KNN(filename="bitcoin_data_V4.csv")
+    knn_accuracy = KNN(filename="bitcoin_data_V4.csv", k=45)
     preprocess = knn_accuracy.preprocess()
-    model = knn_accuracy.model_train(preprocess[0], preprocess[2])
-    knn_accuracy.evaluate(model, preprocess[1], preprocess[3])
+    if args.sklearn_model:
+        model = knn_accuracy.model_train(preprocess[0], preprocess[2])
+        knn_accuracy.evaluate2(model, preprocess[1], preprocess[3])
+    elif args.coded_model:
+        prediction = knn_accuracy.predict(preprocess[1], preprocess[0])
+        knn_accuracy.evaluate(prediction, preprocess[3])
+    
 
-def indicator():
+def indicator(args):
     #Trade Identifier
     trade = CryptoTrade(symbol, Client.KLINE_INTERVAL_1WEEK, long_period + 1)
     trade.dataframe_creation()
-    if trade.bullish_crossover(short_period, long_period) == ("Bullish"): 
+    if True:#trade.bullish_crossover(short_period, long_period) == ("Bullish"): 
         trade_dataframe = trade.get_data_frame()
         dataframe_addition = Analyze(dataframe=trade_dataframe)
         dataframe_addition.averages(short_period, long_period)
-        dataframe_addition.calculate_rsi(long_period)
         dataframe_addition.volume_calculation()
         dataframe_addition.ATR_calculation(long_period)
+        dataframe_addition.calculate_rsi(long_period)
         dataframe_addition.drop_null()
         data = dataframe_addition.get_dataframe()
-        # print(data)
-        knn_prediction = KNN("bitcoin_data_V4.csv")
+        knn_prediction = KNN(filename="bitcoin_data_V4.csv", k=45)
         trade_preprocess = knn_prediction.preprocess()
-        model = knn_prediction.model_train(trade_preprocess[0], trade_preprocess[2])
-        prediction = knn_prediction.predict(data, model)
+        processed_data = knn_prediction.preprocess_single(data)
+        prediction = None
+        if args.sklearn_model:
+            model = knn_prediction.model_train(trade_preprocess[0], trade_preprocess[2])
+            prediction = knn_prediction.current_predict(processed_data, model)
+        elif args.coded_model:
+            prediction = knn_prediction.predict(processed_data, trade_preprocess[0])
         return(str(prediction[0]))
     else:
         return("Neither")
@@ -96,9 +105,9 @@ def main():
     if args.command == 'data_retrieval':
         data_retrieval()
     elif args.command == 'indicator':
-        indicator()
+        indicator(args)
     elif args.command == 'knn_evaluation':
-        knn_evaluation()
+            knn_evaluation(args)
     elif args.command == 'bot_indicator':
         if not utility.check_internet_connection():
             print("Cannot establish internet connection. Exiting...")
