@@ -42,7 +42,7 @@ def indicator(args):
     #Trade Identifier
     trade = CryptoTrade(symbol, Client.KLINE_INTERVAL_1WEEK, long_period + 1)
     trade.dataframe_creation()
-    if True:#trade.bullish_crossover(short_period, long_period) == ("Bullish"): 
+    if trade.bullish_crossover(short_period, long_period) == ("Bullish"): 
         trade_dataframe = trade.get_data_frame()
         dataframe_addition = Analyze(dataframe=trade_dataframe)
         dataframe_addition.averages(short_period, long_period)
@@ -64,13 +64,13 @@ def indicator(args):
     else:
         return("Neither")
     
-async def periodic_notification():
+async def periodic_notification(args):
     result = "Neither"
     stoploss_start = False
     while True:
         current_time = datetime.now()
         if current_time.second == 0 and stoploss_start == False:
-            result = indicator()
+            result = indicator(args)
             stoploss_price = calculate_ATR_stoploss_hourly()
             if result == "Increase":
                 stoploss_start = True
@@ -83,10 +83,10 @@ async def periodic_notification():
                 await (trade_identifier(result, symbol))
         await asyncio.sleep(1)
 
-async def start():
+async def start(args):
     bot_start = asyncio.create_task(start_bot())
     await asyncio.sleep(1)
-    message = asyncio.create_task(periodic_notification())
+    message = asyncio.create_task(periodic_notification(args))
     await asyncio.gather(bot_start, message)
 
 def calculate_ATR_stoploss_hourly():
@@ -112,7 +112,7 @@ def main():
         if not utility.check_internet_connection():
             print("Cannot establish internet connection. Exiting...")
             return
-        asyncio.run(start())
+        asyncio.run(start(args))
     
 
 if __name__ == "__main__":
