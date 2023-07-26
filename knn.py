@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 import utility
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import accuracy_score
 from collections import Counter
 from tqdm import tqdm
 
@@ -74,13 +73,13 @@ class KNN:
 
     def evaluate(self, y_pred, y_test):
 
-        accuracy = accuracy_score(y_test, y_pred)
+        accuracy = self.accuracy_score(y_test, y_pred)
         print("Accuracy:", accuracy)
     
     def evaluate2(self, model, X_test, y_test):
         y_pred = model.predict(X_test)
 
-        accuracy = accuracy_score(y_test, y_pred)
+        accuracy = self.accuracy_score(y_test, y_pred)
         print("Accuracy:", accuracy)
 
     def current_predict(self, dataframe, model):
@@ -94,4 +93,13 @@ class KNN:
         X = dataframe[numeric_columns].copy()
         X_scaled = self.scale_data(X, True)
         return X_scaled
+    
+    def accuracy_score(self, true_labels, pred_labels):
+        correct = 0 
+        prediction_number = len(true_labels)
+        for index, true_label in enumerate(true_labels):
+            if true_label == pred_labels[index]:
+                correct += 1 
+        accuracy = correct / prediction_number
+        return accuracy
 
