@@ -42,7 +42,7 @@ def indicator(args):
     #Trade Identifier
     trade = CryptoTrade(symbol, Client.KLINE_INTERVAL_1WEEK, long_period + 1)
     trade.dataframe_creation()
-    if trade.bullish_crossover(short_period, long_period) == ("Bullish"): 
+    if True: #trade.bullish_crossover(short_period, long_period) == ("Bullish"): 
         trade_dataframe = trade.get_data_frame()
         dataframe_addition = Analyze(dataframe=trade_dataframe)
         dataframe_addition.averages(short_period, long_period)
@@ -69,15 +69,15 @@ async def periodic_notification(args):
     stoploss_start = False
     while True:
         current_time = datetime.now()
-        if current_time.second == 0 and stoploss_start == False:
+        if current_time.minute == 0 and stoploss_start == False:
             result = indicator(args)
-            stoploss_price = calculate_ATR_stoploss_hourly()
+            stoploss_price = calculate_ATR_stoploss_hourly(stoploss_start)
             if result == "Increase":
                 stoploss_start = True
                 await (trade_identifier(result, symbol))
         elif current_time.second == 0 and stoploss_start == True:
-            current_price = calculate_ATR_stoploss_hourly()
-            if stoploss_price[0] > current_price[1]:
+            current_price = calculate_ATR_stoploss_hourly(stoploss_start)
+            if stoploss_price > current_price:
                 stoploss_start = False
                 result = "Sell"
                 await (trade_identifier(result, symbol))
@@ -89,7 +89,7 @@ async def start(args):
     message = asyncio.create_task(periodic_notification(args))
     await asyncio.gather(bot_start, message)
 
-def calculate_ATR_stoploss_hourly():
+def calculate_ATR_stoploss_hourly(stoploss_start):
     trade = CryptoTrade(symbol, Client.KLINE_INTERVAL_1WEEK, long_period + 1)
     trade.dataframe_creation()
     trade_dataframe = trade.get_data_frame()
@@ -98,7 +98,10 @@ def calculate_ATR_stoploss_hourly():
     dataframe_addition.drop_null()
     dataframe = dataframe_addition.get_dataframe()
     trailing_stop_loss = dataframe.at[14, "Close"] - (0.9 * dataframe.at[14, "ATR"])
-    return trailing_stop_loss, dataframe.at[14, "Close"]
+    if stoploss_start == True:
+        return trailing_stop_loss
+    else:
+        return dataframe.at[14, "Close"]
 
 def main():
     args = utility.create_parser()
