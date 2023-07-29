@@ -131,7 +131,8 @@ class Analyze:
                     self.crypto_data.at[bullish_index, "Profit/Loss"] = profit_loss 
                     self.crypto_data.at[bullish_index, "Profit Indicator"] = "Decrease" if profit_loss < 0 else "Increase"
                     bullish_index = None
-
+    
+    def display_graph(self):
         fig, ax = plt.subplots()
         ax.plot(self.crypto_data["Close"], label="Close Price")
         ax.plot(self.crypto_data["Open"], label="Open Price")

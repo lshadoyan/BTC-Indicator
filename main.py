@@ -27,6 +27,7 @@ def knn_evaluation(args):
     data_modifier.drop_null()
     data_modifier.crossover_detection()
     data_modifier.ATR_trailing_stop_loss()
+    data_modifier.display_graph()
     data_modifier.save_as_csv("bitcoin_data_V4.csv")
     knn_accuracy = KNN(filename="bitcoin_data_V4.csv", k=45)
     preprocess = knn_accuracy.preprocess()
@@ -42,7 +43,7 @@ def indicator(args):
     #Trade Identifier
     trade = CryptoTrade(symbol, Client.KLINE_INTERVAL_1WEEK, long_period + 1)
     trade.dataframe_creation()
-    if True: #trade.bullish_crossover(short_period, long_period) == ("Bullish"): 
+    if trade.bullish_crossover(short_period, long_period) == ("Bullish"): 
         trade_dataframe = trade.get_data_frame()
         dataframe_addition = Analyze(dataframe=trade_dataframe)
         dataframe_addition.averages(short_period, long_period)
